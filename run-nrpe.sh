@@ -1,8 +1,11 @@
 #!/bin/bash -e
 
 # Add disk plugin
-CHECKDISKS="$(df | grep -v "/etc/hosts" | grep '^/dev/' | cut -d ' ' -f 1 | sed 's/^/-p /' | tr '\n' ' ')"
-echo "command[check_disk]=$NAGIOS_PLUGINS_DIR/check_disk -w 20% -c 10% $CHECKDISKS" | sudo tee $NAGIOS_CONF_DIR/nrpe.d/disk.cfg > /dev/null
+CHECKDISKS="${CHECKDISKS:-$( ls -d -1 /mnt/* || echo)}"
+if [ ! -z "$CHECKDISKS" ]; then
+    NAGIOS_DRIVES="$(echo "$CHECKDISKS" | awk -F "[ \t\n,]+"  '{for (driveCnt = 1; driveCnt <= NF; driveCnt++) printf "-p %s ",$driveCnt}')"
+    echo "command[check_disk]=$NAGIOS_PLUGINS_DIR/check_disk -w 20% -c 10% $NAGIOS_DRIVES" | sudo tee $NAGIOS_CONF_DIR/nrpe.d/disk.cfg > /dev/null
+fi
 
 # Start NREP Server
 /usr/sbin/nrpe -c $NAGIOS_CONF_DIR/nrpe.cfg -d

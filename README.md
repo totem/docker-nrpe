@@ -14,7 +14,9 @@ The docker-nrpe image is available on docker hub [totem/docker-nrpe:latest](http
 In order to run the NRPE container , use command :
 
 ```
-docker run -v /:/mnt/ROOT --rm --name nrpe -it -p 5666:5666 totem/docker-nrpe
+docker run --privileged -v /:/mnt/ROOT --rm --name nrpe -it -p 5666:5666 totem/docker-nrpe
 ```
 
-Once up, you can monitor server using nagios/icinga.
+Once up, you can monitor server using nagios/icinga. 
+
+Note: In order to monitor multiple disks, simply mount them under /mnt directory.
