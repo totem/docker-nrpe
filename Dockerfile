@@ -10,7 +10,8 @@ ENV NAGIOS_PLUGINS_DIR /usr/lib/nagios/plugins
 
 RUN sed -e 's/^allowed_hosts=/#allowed_hosts=/' -i $NAGIOS_CONF_DIR/nrpe.cfg \
     && echo "command[check_load]=$NAGIOS_PLUGINS_DIR/check_load -w 15,10,5 -c 30,25,20" > $NAGIOS_CONF_DIR/nrpe.d/load.cfg \
-    && echo "command[check_mem]=$NAGIOS_PLUGINS_DIR/check_mem -f -C -w 12 -c 10 " > $NAGIOS_CONF_DIR/nrpe.d/mem.cfg
+    && echo "command[check_total_procs]=/usr/lib/nagios/plugins/check_procs -w 500 -c 700 " > $NAGIOS_CONF_DIR/nrpe.d/procs.cfg \
+    && echo ""
 
 ADD run-nrpe.sh /usr/sbin/run-nrpe.sh
 RUN chmod +x /usr/sbin/run-nrpe.sh
