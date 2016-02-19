@@ -31,7 +31,7 @@ RUN chmod +x /usr/sbin/run-nrpe.sh
 ADD plugins $NAGIOS_PLUGINS_DIR
 RUN chmod +x -R  $NAGIOS_PLUGINS_DIR
 
-ADD nrpe.d $NAGIOS_CONF_DIR/
+ADD nrpe.d $NAGIOS_CONF_DIR/nrpe.d
 
 EXPOSE 5666
 
