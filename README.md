@@ -5,7 +5,7 @@ NRPE Docker Container
 Provides NRPE Server within docker container. This allows remote monitoring of docker hosts from nagios/Icinga.
 
 ## Status
-In Test
+Ready for production
 
 ## Images
 The docker-nrpe image is available on docker hub [totem/docker-nrpe:latest](https://registry.hub.docker.com/u/totem/docker-nrpe). It is setup using hub's automated build process.
