@@ -7,6 +7,7 @@ export ETCD_PORT="${ETCD_PORT:-4001}"
 
 export CHECK_YODA="${CHECK_YODA:-}"
 export CHECK_YODA_HOST="${CHECK_YODA_HOST:-$HOST_IP}"
+export MACHINE_ID="${MACHINE_ID:-local}"
 
 
 NRPE_EXEC="/usr/bin/nrpe"
