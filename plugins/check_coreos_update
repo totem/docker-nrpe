@@ -1,5 +1,5 @@
 #!/bin/sh -e
-source /usr/lib/nagios/plugins/host_info
+eval /usr/lib/nagios/plugins/host_info
 
 update_status="$(${ETCD_HOSTINFO_GET}/update/status)"
 
