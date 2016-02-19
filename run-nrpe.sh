@@ -9,8 +9,11 @@ export CHECK_YODA="${CHECK_YODA:-}"
 export CHECK_YODA_HOST="${CHECK_YODA_HOST:-$HOST_IP}"
 export MACHINE_ID="${MACHINE_ID:-local}"
 
-
-NRPE_EXEC="/usr/bin/nrpe"
+if [ -f "/usr/sbin/nrpe" ]; then
+  NRPE_EXEC="/usr/sbin/nrpe"
+else
+  NRPE_EXEC="/usr/bin/nrpe"
+fi
 
 
 # Add disk plugin
@@ -24,7 +27,7 @@ fi
 $NRPE_EXEC -c $NAGIOS_CONF_DIR/nrpe.cfg -d
 
 # Wait for NRPE Daemon to exit
-PID=$(ps -ef | grep -v grep | grep  "${NRPE_EXEC}" | awk '{print $1}')
+PID=$(ps -ef | grep -v grep | grep  "${NRPE_EXEC}" | awk '{print $2}')
 if [ ! "$PID" ]; then
   echo "Error: Unable to start nrpe daemon..."
   # exit 1
