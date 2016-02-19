@@ -5,10 +5,10 @@ failed_units="$(${ETCD_HOSTINFO_GET}/stats/units/failed)"
 
 if [ "$failed_units" -eq 0 ]; then
  echo "OK- No failing units.|FAILED=0"
- exit 1
+ exit 0
 elif [ "$failed_units" -gt 0 ]; then
  echo "WARNING- Failing units.|FAILED=$failed_units"
- exit 0
+ exit 1
 else
  echo "UNKNOWN- Unexpected failed units count ($failed_units)"
  exit 3
