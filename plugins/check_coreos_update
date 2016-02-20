@@ -1,0 +1,15 @@
+#!/bin/sh -e
+. /usr/lib/nagios/plugins/host_info
+
+update_status="$(${ETCD_HOSTINFO_GET}/update/status)"
+
+if echo "$update_status" | grep "NEED_REBOOT"; then
+ echo "WARNING- Host updated. ($update_status)"
+ exit 1
+elif echo "$update_status" | grep "UPDATE_STATUS"; then
+ echo "OK- ($update_status)"
+ exit 0
+else
+ echo "UNKNOWN- Unexpected status ($update_status)"
+ exit 3
+fi

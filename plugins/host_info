@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+export HOST_IP="${HOST_IP:-$(/sbin/ip route|awk '/default/ { print $3 }')}"
+export ETCD_HOST="${ETCD_HOST:-$HOST_IP}"
+export ETCD_PORT="${ETCD_PORT:-4001}"
+export ETCD_HOSTINFO_BASE="${ETCD_HOSTINFO_BASE:-/totem}"
+export MACHINE_ID="${MACHINE_ID:-local}"
+export ETCD_HOSTINFO_GET="etcdctl --endpoint=$ETCD_HOST:$ETCD_PORT get $ETCD_HOSTINFO_BASE/machines/$MACHINE_ID"
