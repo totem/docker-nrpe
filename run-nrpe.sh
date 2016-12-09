@@ -23,7 +23,7 @@ if [ ! -z "$CHECKDISKS" ]; then
     echo "command[check_disk]=$NAGIOS_PLUGINS_DIR/check_disk -w 20% -c 10% $NAGIOS_DRIVES" | tee $NAGIOS_CONF_DIR/nrpe.d/disk.cfg > /dev/null
 fi
 
-# Start NREP Server
+# Start NRPE Server
 $NRPE_EXEC -c $NAGIOS_CONF_DIR/nrpe.cfg -d
 
 # Wait for NRPE Daemon to exit
