@@ -1,23 +1,69 @@
-FROM debian:jessie
+FROM ubuntu:16.04
+MAINTAINER Damien Joldersma <damien@theamven.net>
 
-RUN apt-get update --fix-missing \
-    && apt-get install -q -y nagios-nrpe-server nagios-plugins curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt /tmp/* /var/tmp/*
-
-ENV NAGIOS_CONF_DIR /etc/nagios
+ENV NAGIOS_HOME			/opt/nagios
+ENV NAGIOS_USER			nagios
+ENV NAGIOS_GROUP		nagios
+ENV NAGIOS_CMDUSER		nagios
+ENV NAGIOS_CMDGROUP		nagios
+ENV NAGIOS_CONF_DIR /opt/nagios/etc
+ENV NAGIOS_PLUGINS_BRANCH	release-2.2.1
 ENV NAGIOS_PLUGINS_DIR /usr/lib/nagios/plugins
+ENV NRPE_BRANCH			nrpe-3.2.1
 
-RUN sed -e 's/^allowed_hosts=/#allowed_hosts=/' -i $NAGIOS_CONF_DIR/nrpe.cfg \
-    && echo "command[check_load]=$NAGIOS_PLUGINS_DIR/check_load -w 15,10,5 -c 30,25,20" > $NAGIOS_CONF_DIR/nrpe.d/load.cfg \
-    && echo "command[check_mem]=$NAGIOS_PLUGINS_DIR/check_mem -f -C -w 12 -c 10 " > $NAGIOS_CONF_DIR/nrpe.d/mem.cfg \
-    && echo "command[check_total_procs]=/usr/lib/nagios/plugins/check_procs -w 500 -c 700 " > $NAGIOS_CONF_DIR/nrpe.d/procs.cfg
 
-RUN curl -o /usr/local/bin/dumb-init -L https://github.com/Yelp/dumb-init/releases/download/v1.0.0/dumb-init_1.0.0_amd64 && \
+RUN	apt-get update && apt-get install -y \
+		curl \
+		jq \
+		ruby \
+		telnet \
+		iputils-ping \
+		netcat \
+		dnsutils \
+		build-essential \
+		automake \
+		autoconf \
+		gettext \
+		git \
+		libssl-dev && \
+  apt-get clean
+
+RUN	( egrep -i "^${NAGIOS_GROUP}"    /etc/group || groupadd $NAGIOS_GROUP    )
+RUN ( egrep -i "^${NAGIOS_CMDGROUP}" /etc/group || groupadd $NAGIOS_CMDGROUP )
+RUN	( id -u $NAGIOS_USER    || useradd --system -d $NAGIOS_HOME -g $NAGIOS_GROUP    $NAGIOS_USER    )
+RUN	( id -u $NAGIOS_CMDUSER || useradd --system -d $NAGIOS_HOME -g $NAGIOS_CMDGROUP $NAGIOS_CMDUSER )
+
+RUN	( mkdir -p ${NAGIOS_HOME}/libexec/ )
+
+RUN	cd /tmp							&& \
+	git clone https://github.com/nagios-plugins/nagios-plugins.git -b $NAGIOS_PLUGINS_BRANCH		&& \
+	cd nagios-plugins					&& \
+	./tools/setup						&& \
+	./configure \
+		--prefix=${NAGIOS_HOME}				&& \
+	make							&& \
+	make install						&& \
+	make clean	&& \
+	mkdir -p /usr/lib/nagios/plugins	&& \
+	ln -sf /opt/nagios/libexec/utils.pm /usr/lib/nagios/plugins
+
+RUN	cd /tmp							&& \
+	git clone https://github.com/NagiosEnterprises/nrpe.git	-b $NRPE_BRANCH	&& \
+	cd nrpe							&& \
+	./configure \
+	  --with-pkgsysconfdir=/opt/nagios/etc \
+		--with-ssl=/usr/bin/openssl \
+		--with-ssl-lib=/usr/lib/x86_64-linux-gnu	&& \
+	make nrpe						&& \
+	make install-config						&& \
+	cp -v src/nrpe /usr/bin/nrpe		&& \
+	make clean
+
+RUN curl -s -o /usr/local/bin/dumb-init -L https://github.com/Yelp/dumb-init/releases/download/v1.0.0/dumb-init_1.0.0_amd64 && \
    chmod +x /usr/local/bin/dumb-init
 
 ENV ETCDCTL_VERSION v2.2.5
-RUN curl -L https://github.com/coreos/etcd/releases/download/$ETCDCTL_VERSION/etcd-$ETCDCTL_VERSION-linux-amd64.tar.gz -o /tmp/etcd-$ETCDCTL_VERSION-linux-amd64.tar.gz && \
+RUN curl -s -L https://github.com/coreos/etcd/releases/download/$ETCDCTL_VERSION/etcd-$ETCDCTL_VERSION-linux-amd64.tar.gz -o /tmp/etcd-$ETCDCTL_VERSION-linux-amd64.tar.gz && \
     cd /tmp && gzip -dc etcd-$ETCDCTL_VERSION-linux-amd64.tar.gz | tar -xof - && \
     cp -f /tmp/etcd-$ETCDCTL_VERSION-linux-amd64/etcdctl /usr/local/bin && \
     rm -rf /tmp/etcd-$ETCDCTL_VERSION-linux-amd64.tar.gz
