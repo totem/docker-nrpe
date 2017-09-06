@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Damien Joldersma <damien@theamven.net>
+MAINTAINER Damien Joldersma <damien@themaven.net>
 
 ENV NAGIOS_HOME			/opt/nagios
 ENV NAGIOS_USER			nagios
