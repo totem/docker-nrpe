@@ -8,9 +8,9 @@ ENV NAGIOS_CMDUSER		nagios
 ENV NAGIOS_CMDGROUP		nagios
 ENV NAGIOS_CONF_DIR /opt/nagios/etc
 ENV NAGIOS_PLUGINS_BRANCH	release-2.2.1
-ENV NAGIOS_PLUGINS_DIR /usr/lib/nagios/plugins
+ENV NAGIOS_PLUGINS_DIR /opt/nagios/plugins
+ENV NAGIOS_LIBEXEC_DIR /opt/nagios/libexec
 ENV NRPE_BRANCH			nrpe-3.2.1
-
 
 RUN	apt-get update && apt-get install -y \
 		curl \
@@ -33,7 +33,7 @@ RUN ( egrep -i "^${NAGIOS_CMDGROUP}" /etc/group || groupadd $NAGIOS_CMDGROUP )
 RUN	( id -u $NAGIOS_USER    || useradd --system -d $NAGIOS_HOME -g $NAGIOS_GROUP    $NAGIOS_USER    )
 RUN	( id -u $NAGIOS_CMDUSER || useradd --system -d $NAGIOS_HOME -g $NAGIOS_CMDGROUP $NAGIOS_CMDUSER )
 
-RUN	( mkdir -p ${NAGIOS_HOME}/libexec/ )
+RUN	( mkdir -p ${NAGIOS_HOME}/libexec ${NAGIOS_HOME}/var )
 
 RUN	cd /tmp							&& \
 	git clone https://github.com/nagios-plugins/nagios-plugins.git -b $NAGIOS_PLUGINS_BRANCH		&& \
