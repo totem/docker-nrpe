@@ -17,9 +17,10 @@ fi
 
 
 # Add disk plugin
-CHECKDISKS="${CHECKDISKS:-$( df -hT | grep -v -e tmpfs -e  overlay -e Mounted | awk '{print $7}' ) }"
+CHECKDISKS="${CHECKDISKS:-$( df -hT | grep -v -e tmpfs -e  overlay -e Mounted -e aws-ebs -e snap | awk '{print $7}' ) }"
 if [ ! -z "$CHECKDISKS" ]; then
-    NAGIOS_DRIVES="$(echo "$CHECKDISKS" | awk -F "[ \t\n,]+"  '{for (driveCnt = 1; driveCnt <= NF; driveCnt++) printf "-p %s ",$driveCnt}')"
+    NAGIOS_DRIVES_RAW=$(echo "$CHECKDISKS" | awk -F "[ \t\n,]+" '{for (driveCnt = 1; driveCnt <= NF; driveCnt++) printf "-p %s ",$driveCnt}')
+    NAGIOS_DRIVES=$(echo "$NAGIOS_DRIVES_RAW" | sed -e 's/ -p\s*$//')
     echo "command[check_disk]=$NAGIOS_LIBEXEC_DIR/check_disk -w 20% -c 10% $NAGIOS_DRIVES" | tee $NAGIOS_CONF_DIR/nrpe.d/disk.cfg > /dev/null
 fi
 
